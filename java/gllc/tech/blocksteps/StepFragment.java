@@ -1,12 +1,16 @@
 package gllc.tech.blocksteps;
 
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -56,6 +60,8 @@ import gllc.tech.blocksteps.Auomation.SetAlarm;
 import gllc.tech.blocksteps.Auomation._Users_Admin_Desktop_Steps_sol_Steps;
 import gllc.tech.blocksteps.Services.StepService;
 
+import static android.app.Activity.RESULT_CANCELED;
+import static android.app.Activity.RESULT_OK;
 import static org.web3j.tx.Contract.GAS_LIMIT;
 import static org.web3j.tx.ManagedTransaction.GAS_PRICE;
 
@@ -444,6 +450,7 @@ public class StepFragment extends Fragment {
             SetAlarm.resetAlarm(getContext());
         }
     }
+
     public void loadBlockchainData(int day) {
 
         String formattedDate = DateFormatter.GetConCatDate(day);
@@ -542,5 +549,31 @@ public class StepFragment extends Fragment {
             day6Steps.setText(mySteps.get().getValue()+"");
             day6Title.setText(DateFormatter.GetMonthYear(day));
         }
+    }
+
+
+    // Define the callback for what to do when data is received
+    private BroadcastReceiver testReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            int resultCode = intent.getIntExtra("resultCode", RESULT_CANCELED);
+            if (resultCode == RESULT_OK) {
+                String resultValue = intent.getStringExtra("resultValue");
+                //Toast.makeText(MainActivity.this, "From Activity: " + resultValue, Toast.LENGTH_SHORT).show();
+                todayStepsBig.setText(resultValue);
+                day0Steps.setText(resultValue);
+            }
+        }
+    };
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Register for the particular broadcast based on ACTION string
+        IntentFilter filter = new IntentFilter(StepService.ACTION);
+        LocalBroadcastManager.getInstance(getContext()).registerReceiver(testReceiver, filter);
+        // or `registerReceiver(testReceiver, filter)` for a normal broadcast
+        todayStepsBig.setText(StepService.numSteps+"");
+        day0Steps.setText(StepService.numSteps+"");
     }
 }

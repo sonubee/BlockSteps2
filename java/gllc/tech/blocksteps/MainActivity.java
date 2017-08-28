@@ -24,6 +24,7 @@ import android.view.MenuItem;
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.FirebaseApp;
 
+import gllc.tech.blocksteps.Services.SendStepsService;
 import gllc.tech.blocksteps.Services.StepService;
 import io.fabric.sdk.android.Fabric;
 
@@ -49,7 +50,7 @@ public class MainActivity extends AppCompatActivity
         //getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, stepFragment).commit();
 
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fragment_container, stepFragment).commit();
+                .replace(R.id.fragment_container, stepFragment,"StepFragment").commit();
 
     }
 
@@ -68,8 +69,24 @@ public class MainActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Reloading Blockchain", Snackbar.LENGTH_LONG)
+                Snackbar.make(view, "Reloading From Blockchain", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
+
+                StepFragment stepFragment = (StepFragment) getSupportFragmentManager().findFragmentByTag("StepFragment");
+
+                for (int i=0; i>=-6; i--) {stepFragment.loadBlockchainData(i);}
+            }
+        });
+
+        FloatingActionButton fab2 = (FloatingActionButton) findViewById(R.id.fab2);
+        fab2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Snackbar.make(view, "Sending Steps to Blockchain", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+
+                Intent i = new Intent(MainActivity.this, SendStepsService.class);
+                startService(i);
             }
         });
 
@@ -99,7 +116,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
+        //getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
 
@@ -146,4 +163,6 @@ public class MainActivity extends AppCompatActivity
     public static String getHardwareId(Context context) {
         return Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
     }
+
+
 }
